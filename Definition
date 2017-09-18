@@ -1,2 +1,3 @@
-Below are various aspects how Docker can be difined.
-* Docker is a lightweight virtual machine.
+Docker is a platform that provides isolated workspace for containerised software, giving the application a great advantage to run
+identically in all environment. It defines Linux internal namespaces to provide this isolation while using the kernel of base Operating 
+System making it like a light weight virtual machine without the overhead of a complete operating system.
