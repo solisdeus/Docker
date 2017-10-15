@@ -1,9 +1,15 @@
 Clouds are pools of virtual resources, such as processing power, storage, or cloud base application orchestrated by management and 
 automation software so they can be accessed by users on-demand through some self-service portals supported by automatic scaling and
 dynamic resource allocation.
+Virtual resources needs to be allocated into centralized pools before they are called clouds and those clouds need to be orchestrated by
+management and autonmation software before it's considered cloud computing.
+Cloud deliver the added benefits of self-service access, automated intfrastructure scaling and dynamic resource pools, which distinguishes 
+it form traditional virtualization.
+
 
 IaaS: Bare minimum hardware and software needed to deploy a cloud: Servers, Storage , Network and Virtualization. Each of these services
 can be scaled, provisioned and metered atomatically, while every other part of the IT stack - from OS to application, must be managed by
 consumers.
+
 
 PaaS: All hardware and software that Iaas provides alongwith the OS, middleware and runtime environment.
