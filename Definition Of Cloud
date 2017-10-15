@@ -1,0 +1,9 @@
+Clouds are pools of virtual resources, such as processing power, storage, or cloud base application orchestrated by management and 
+automation software so they can be accessed by users on-demand through some self-service portals supported by automatic scaling and
+dynamic resource allocation.
+
+IaaS: Bare minimum hardware and software needed to deploy a cloud: Servers, Storage , Network and Virtualization. Each of these services
+can be scaled, provisioned and metered atomatically, while every other part of the IT stack - from OS to application, must be managed by
+consumers.
+
+PaaS: All hardware and software that Iaas provides alongwith the OS, middleware and runtime environment.
