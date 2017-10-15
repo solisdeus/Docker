@@ -1,2 +1,1 @@
-# Docker
-Capture basics of Docker
+Capture Basic concepts from generous netizens.
