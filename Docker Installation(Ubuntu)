@@ -1,0 +1,27 @@
+
+### Install packages to allow apt to use a repository over HTTPS
+$ sudo apt-get update && sudo apt-get install apt-transport-https
+
+### Add Docker’s official GPG key
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+### Add Docker apt repository
+$ sudo add-apt-repository \
+  "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) \
+  stable"
+  
+### Install Docker CE.
+$ sudo apt-get update && sudo apt-get install docker-ce=18.06.2~ce~3-0~ubuntu
+
+### Add your user to the docker group.
+$ sudo usermod -aG docker $USER
+
+### Test the install
+$ docker --version
+$ docker run hello-world
+
+Ref:
+1. https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+2. https://docs.docker.com/install/linux/linux-postinstall/
+3. https://docs.docker.com/install/linux/docker-ce/centos/
