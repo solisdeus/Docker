@@ -1,25 +1,32 @@
+##Swap filesystem must be off
+$ sudo swapoff -a
+$ cat /etc/fstab
+<--delete entries in fstab for swap manually to make it permanent-->
 
-sudo swapoff -a
-cat /etc/fstab
-
-
+## Install the https transport utility
 sudo apt-get update && sudo apt-get install -y apt-transport-https curl
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-sudo sh -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+
+
+$ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+$ sudo sh -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF'
-sudo apt-get update && sudo apt-get install -y kubelet kubeadm kubectl
-sudo apt-mark hold kubelet kubeadm kubectl
+$ sudo apt-get update && sudo apt-get install -y kubelet kubeadm kubectl
+$ sudo apt-mark hold kubelet kubeadm kubectl
 
 <--this is only for master-->
-kubeadm init --pod-network-cidr=10.244.0.0/16
-sysctl net.bridge.bridge-nf-call-iptables=1
+$ kubeadm init --pod-network-cidr=10.244.0.0/16
+$ sysctl net.bridge.bridge-nf-call-iptables=1
 <--master only ends -->
-o make kubectl work for your non-root user, run these commands, which are also part of the kubeadm init output:
 
+## make kubectl work for your non-root user, run these commands, which are also part of the kubeadm init output:
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+## Apply a CNI to the cluster (Cluster Network Interface - flannel, calico etc.)
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
+
+##Validate Kubectl working
 kubectl get pods --all-namespaces
+kubectl get nodes
