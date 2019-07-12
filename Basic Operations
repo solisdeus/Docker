@@ -1,0 +1,57 @@
+1)## spec.template is definitation of a POD which is the smallest entity in kubernetes. Except for a POD, we must use spec.template 
+    in other entities that may use a POD. The containers spec is an arrey so it must start with - name.
+
+cloud_user@pchat111c:~$ cat pi-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4
+  
+  ## After creating the yaml file, below commands can be used to create the job.
+  
+  $ kubectl apply -f pi-job.yaml
+  $ kubectl create -f pi-job.yaml
+  
+  ## To get output written by a POD.
+  $ kubectl logs <pod-name>
+  
+  ## To get details of a POD
+  $kubectl describe pod <pod-name>
+  
+  2)## each type of component has a template. apiVersion and kind are specific and used only as documented. Metadata contains
+      name, labels, namespace, spec. Spec contains containers. 
+  
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+    - name: myapp-container
+      image: busybox
+      command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']\
+      
+  3)## to get the list of PODs in cluster with assigned node.
+  ~$ kubectl get pods -o=wide
+NAME          READY   STATUS      RESTARTS   AGE    IP           NODE                        NOMINATED NODE   READINESS GATES
+myapp-pod     1/1     Running     1          111m   10.244.1.2   pchat112c.mylabserver.com   <none>           <none>
+ngnix         1/1     Running     0          105m   10.244.2.6   pchat113c.mylabserver.com   <none>           <none>
+pi-7g5m9      0/1     Completed   0          3d1h   10.244.2.2   pchat113c.mylabserver.com   <none>           <none>
+sleep-zpp4f   0/1     Completed   0          142m   10.244.2.3   pchat113c.mylabserver.com   <none>           <none>
+
+$ kubectl get pods --all-namespaces -o=wide  <-- to get pods from all namespace-->
+$ kubectl get pods -n kube-system <-- to get pods for specific namespace -->
+
+
+  
