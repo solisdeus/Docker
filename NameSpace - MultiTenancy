@@ -1,0 +1,89 @@
+kubectl create namespace mynewspace
+kubectl delete namespace mynewspace
+kubectl get ns <-- to view all namespaces 
+kubectl get ns --sort-by=.metadata.creationTimestamp <--to view by timestamp
+Namespaces must be lebbeled for easy of policy application
+kubectl label namespace/mynewspace purpose=prod
+kubectl label namespace/mynewspace name=ProjectXYZ
+describe ns mynewspace <-- this will show the labels defined for the ns with limits and quotas if allocated.
+
+kubectl get pods -n mynewspace <-- to get all pods in a particular namespace
+kubectl get pods --all-namespaces -o wide <-- to get all pods from all namespaces
+---Demo
+
+1) resourcequota.yml
+apiVersion: V1
+kind: Namespace
+metadata:
+ name: myspace
+---
+ apiVersion: v1
+ kind: ResourceQuota
+ metadata:
+  name: compute-quota
+  namespace: myspace
+ spec:
+  hard:
+    requests.cpu: '1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: object-quota
+  namespace: myspace
+spec:
+  hard:
+    configmaps: "10"
+    persistentvolumeclaims: "4"
+    secrets: "10"
+    services: "10"
+    services.loadbalancers: "2"
+    recplicationcontrollers: "20"
+    
+    
+ kubectl create -f resourcequota.yml
+ 
+ <-- this will create a namespace alongwith the quotalimits
+ <-- now create a hello world deployment and explore the quotas
+ 
+ helloworld-no-quotas.yml
+ 
+ apiVersion: extensions/v1beta1
+ kind: Deployment
+ metadata:
+  name: helloworld-deployment
+  namespace: myspace
+ spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: helloworld
+    spec:
+      containers:
+      - name:ks2-demo
+      image: helloworld
+      ports:
+        - name: nodejs-port
+          containerPort: 3000
+
+
+kubectl create -f helloworld-no-quotas.yml
+
+
+kubectl get deploy --namespace=myspace
+
+kubectl get rs --namespace=myspace <-- to get the all pods per deployment
+
+kubectl describe rs/helloworld-deployment --namespace=myspace
+<-- this will list if there were errors in creation due to quota or limit
+<-- when we create a namespace with quotas..we must supply these values while creating the deployment.
+
+
+another yml file with quota:
+
+
+
