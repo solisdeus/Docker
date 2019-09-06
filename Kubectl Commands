@@ -1,0 +1,5 @@
+kubectl run busybox --image=busybox -it --restart=Never --rm -- echo 'hello world'
+
+# -it --> option for interactive & terminal
+# --restart=Never --> creates pods , ifnot given then creates deployment in depreciated version. Also, exits out of container after finishing command.
+# --rm --> use when you want to deleted the completed container
