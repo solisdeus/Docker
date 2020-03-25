@@ -1,0 +1,2 @@
+1. openssl genrsa -out sud.key 2048
+2. openssl req -new -key sud.key -our sud.csr -subj "/CN=sud/O=USEmployee/O=DocUpload"
