@@ -1,2 +1,65 @@
-1. openssl genrsa -out sud.key 2048
-2. openssl req -new -key sud.key -our sud.csr -subj "/CN=sud/O=USEmployee/O=DocUpload"
+1. Generate a private key locally
+openssl genrsa -out sud.key 2048
+2. create a CSR with the new key; CN = userName and O = Group, can be used later to control access.
+openssl req -new -key sud.key -our sud.csr -subj "/CN=sud/O=USEmployee/O=DocUpload"
+3. kubeadmin level user must sign the csr with ca.key and ca.crt to validate them.
+openssl x509 req -in sud.csr -CA /etc/kubernetes/pki/ca.crt -CAKey /etc/kubernetes/pki/ca.key -CAcreateserial -out sud.crt days 500
+4. read the crt created just now
+openssl x509 -noout -text in sud.crt
+
+
+Now set this user on local config file to be used later.
+1. kubectl config set-credentials sud --client-certificate=sud.crt --client-key=sud.key
+2. kubectl config view # can see that new user is added to local config.
+3. kubectl config set-context sud-context --cluster=kubernetes --namespace=default --user=sud
+4. kubectl --context=sud-context get po
+5. kubectl config current-context
+6. kubectl config use-context sud-context
+
+
+#create role and role-binding; cluster-role and cluster-role-binding give access to entire 
+cluster while regular role and binding give access to select namespace.
+1. A role defines a set of actions allowed on kubernetes ojbects. Multiple users can be assigned same role, so it is a 
+reusable component.
+
+cat << EOF >> role.yaml
+> apiVersion: rbac.authorization.k8s.io/v1
+> kind: Role
+> metadata:
+>   namespace: default
+>   name: pod-reader
+> rules:
+> - apiGroups: [""] # "" indicates the core API group
+>   resources: ["pods","deployment"]
+>   verbs: ["get", "watch", "list"]
+> EOF
+
+2.
+kubectl create -f role.yaml
+kubectl get roles
+
+3. A role binding must be defined for each user to assign them some role. It has a role and a user mapping.
+
+cat << EOF >> sud-pod-default-rolebinding.yaml
+> apiVersion: rbac.authorization.k8s.io/v1
+> # This role binding allows "sud" to read pods in the "default" namespace.
+> # You need to already have a Role named "pod-reader" in that namespace.
+> kind: RoleBinding
+> metadata:
+>   name: read-pods
+>   namespace: default
+> subjects:
+> # You can specify more than one "subject"
+> - kind: User
+>   name: sud # "name" is case sensitive
+>   apiGroup: rbac.authorization.k8s.io
+> roleRef:
+>   # "roleRef" specifies the binding to a Role / ClusterRole
+>   kind: Role #this must be Role or ClusterRole
+>   name: pod-reader # this must match the name of the Role or ClusterRole you wish to bind to
+>   apiGroup: rbac.authorization.k8s.io
+> EOF
+
+4. kubectl create -f sud-pod-default-rolebinding.yaml
+
+
