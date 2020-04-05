@@ -67,3 +67,7 @@ sudo apt-get install kubectl=1.16.6-00
 sudo apt-get install kubelet=1.16.6-00
 
 Done.
+
+
+>> Running a busybox with command.
+kubectl run busybox2 --image=busybox -- /bin/sh -c "echo Hello Sudarshan from POD; sleep 1000;"
