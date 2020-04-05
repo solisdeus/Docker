@@ -3,3 +3,67 @@ kubectl run busybox --image=busybox -it --restart=Never --rm -- echo 'hello worl
 # -it --> option for interactive & terminal
 # --restart=Never --> creates pods , ifnot given then creates deployment in depreciated version. Also, exits out of container after finishing command.
 # --rm --> use when you want to deleted the completed container
+
+
+kubectl port-forward <podname> localPort:PodServingPort
+
+#With this connection in place, you can use your local workstation to debug the database that is running in the Pod.
+kubectl port-forward deployment/redis-master 7000:6379
+kubectl port-forward replicaset/redis-master 7000:6379
+kubectl port-forward service/redis-master 7000:6379
+
+
+#executing command to a running pod
+kubectl exec -it nginx-75b7bfdb6b-5m4tt -- env
+
+NodePort Service: basically creates a route from service port to node port to container port.
+1. Service port is basically we define just port with service definition, an end usr hitting the service comes via the service port.
+2. NodePort is a physical port on the node, dynamically allocated or even manually if required.
+3. TargetPort is the port where the container serves the request.
+Def:
+1st create a clusterIp service by
+> kubectl expose deploy/nginx --port=9000<servicePort> --targetPort=80<containerPort> >> service.yaml
+then open the yaml file and edit as below.
+
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-04-05T06:59:16Z"
+  labels:
+    app: nginx
+  name: nginx
+  namespace: default
+  resourceVersion: "572040"
+  selfLink: /api/v1/namespaces/default/services/nginx
+  uid: 298cfddf-5a6c-423e-bdc4-c4104cebb016
+spec:
+  clusterIP: 10.109.194.236 ---can be deleted, will auto generate
+  ports:
+  - port: 9000
+    nodePort: 30082 ------modified
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  sessionAffinity: None
+  type: NodePort -------modified
+status:
+  loadBalancer: {}
+  
+END.
+
+
+upgrade kube cluster components
+1. install the package of kubeadm 1.16.6-00 version using apt-get install.
+sudo apt-mark unhold kubeadm
+sudo apt-get install kubeadm=1.16.6-00
+
+2. Check the plan of upgrade, gives you info on what all components would need to be upgraded.Then apply upgrade.
+sudo kubeadm upgrade plan
+sudo kubeadm upgrade apply v1.16.6
+
+3. Once kubeadm is upgraded, use apt-get to install 1.16.6-00 version on kubelet & kubectl on master and kubelet on worker.
+sudo apt-get install kubectl=1.16.6-00
+sudo apt-get install kubelet=1.16.6-00
+
+Done.
