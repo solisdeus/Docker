@@ -1,0 +1,70 @@
+We can label nodes and make use of it for scheduling pods while creating deployments.
+****************************************************
+Add/Remove labels to nodes
+****************************************************
+1) kubectl get nodes --show-labels
+pchat111c.mylabserver.com   Ready    master   117d   v1.17.3   av-zone=IPC-1,beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,env=qa,kubernetes.io/arch=amd64,kubernetes.io/hostname=pchat111c.mylabserver.com,kubernetes.io/os=linux,node-role.kubernetes.io/master=,shared-type=dedicated
+pchat112c.mylabserver.com   Ready    <none>   117d   v1.17.3   av-zone=IPC-2,beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=pchat112c.mylabserver.com,kubernetes.io/os=linux,shared-type=shared
+pchat113c.mylabserver.com   Ready    <none>   117d   v1.17.3   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,env=dev,kubernetes.io/arch=amd64,kubernetes.io/hostname=pchat113c.mylabserver.com,kubernetes.io/os=linux
+
+2) kubectl label node pchat111c.mylabserver.com env=qa
+3) kubectl label node pchat113c.mylabserver.com env=dev
+Note: To remove a label=> kubectl label node chat113c.mylabserver.com env-
+****************************************************
+Create deployment with affinity
+****************************************************
+1) kubectl create deployment busybox-qa -n web --image=busybox --dry-run -o=yaml >> busybox-qa.yaml
+2) vi busybox-qa.yaml : just update replicas and add affinity for the pod spec form kubernetes.io (node affinity)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: busybox-qa
+  name: busybox-qa
+  namespace: web
+spec:
+#Updated replicas here *************
+  replicas: 3 
+  selector:
+    matchLabels:
+      app: busybox-qa
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: busybox-qa
+    spec:
+    #addedd affinity section manually.***************
+      affinity:
+       nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+         nodeSelectorTerms:
+         - matchExpressions:
+         #assigned node affinity which matches the master node intentionally here.**************
+           - key: env
+             operator: In
+             values:
+             - qa
+      containers:
+      - image: busybox
+        name: busybox
+        #added args manually from kubernetes cheatsheet
+        args:
+        - sleep
+        - "10000"
+        resources: {}
+status: {}
+
+Note: Hard(requiredDuringSchedulingIgnoredDuringExecution) and Soft(preferredDuringSchedulingIgnoredDuringExecution) affinity.
+
+3) No let's create this deployment
+$ kubectl apply -f busybox-qa.yaml
+
+4) Let's check the rollout logs and play around it
+$ kubectl rollout status deploy busybox-qa -n web
+
+
+
